@@ -1,4 +1,5 @@
-require "eightyeightpages_client/version"
+require 'eightyeightpages_client/version'
+require 'httparty'
 
 module EightyeightpagesClient
   class Query
