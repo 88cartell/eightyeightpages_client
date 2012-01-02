@@ -14,7 +14,7 @@ module EightyeightpagesClient
 
     def method_missing(form, *args)
       begin
-        self.class.get("/api/forms/#{form.to_s.gsub('_', '-')}/entries.json?referer=#{referer}").parsed_response
+        Map.new self.class.get("/api/forms/#{form.to_s.gsub('_', '-')}/entries.json?referer=#{referer}").parsed_response
       rescue
         rescue super(field, *args)
       end
