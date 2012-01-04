@@ -1,6 +1,5 @@
 require 'eightyeightpages_client/version'
 require 'httparty'
-require 'map'
 
 module EightyeightpagesClient
   class Query
@@ -13,9 +12,20 @@ module EightyeightpagesClient
       self.class.base_uri "#{account_name}.88pages.com"
     end
 
+    def unescape(value)
+      case value
+      when Array
+        value.map { |v| unescape(v) }
+      when Hash
+        Hash[value.map { |k, v| [k, unescape(v)] }]
+      else
+        CGI::unescape value
+      end
+    end
+
     def method_missing(form, *args)
       begin
-        Map.new self.class.get("/api/forms/#{form.to_s.gsub('_', '-')}/entries.json?referer=#{referer}").parsed_response
+        unescape self.class.get("/api/forms/#{form.to_s.gsub('_', '-')}/entries.json?referer=#{referer}").parsed_response
       rescue
         rescue super(field, *args)
       end
