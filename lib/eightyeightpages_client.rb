@@ -19,7 +19,7 @@ module EightyeightpagesClient
       when Hash
         Hash[value.map { |k, v| [k, unescape(v)] }]
       else
-        CGI::unescape value
+        if value.is_a?(String) then CGI::unescape(value) else value
       end
     end
 
