@@ -24,6 +24,7 @@ module EightyeightpagesClient
     end
 
     def where(hash)
+      @records = nil
       hash.each do |key, value|
         self.url += "&where[#{key}]=#{value}"
       end
@@ -31,6 +32,7 @@ module EightyeightpagesClient
     end
 
     def any_of(*array)
+      @records = nil
       array.each do |match|
         match.each do |key, value|
           self.url += "&any_of[#{key}][]=#{value}"
@@ -40,6 +42,7 @@ module EightyeightpagesClient
     end
 
     def any_in(hash)
+      @records = nil
       hash.each do |key, value|
         value.each do |v|
           self.url += "&any_in[#{key}][]=#{v}"
@@ -49,6 +52,7 @@ module EightyeightpagesClient
     end
 
     def order_by(hash)
+      @records = nil
       hash.each do |key, value|
         value = 'asc' if value != 'asc' and value != 'desc'
         self.url += "&order_by[#{key}]=#{value}"
@@ -57,11 +61,13 @@ module EightyeightpagesClient
     end
 
     def skip(amount)
+      @records = nil
       self.url += "&skip=#{amount.to_i}"
       self
     end
 
     def limit(amount)
+      @records = nil
       self.url += "&limit=#{amount.to_i}"
       self
     end
