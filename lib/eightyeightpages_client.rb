@@ -23,10 +23,6 @@ module EightyeightpagesClient
       @records ||= self.class.get(self.url).parsed_response
     end
 
-    def length
-      records.length
-    end
-
     def where(hash)
       hash.each do |key, value|
         self.url += "&where[#{key}]=#{value}"
@@ -69,6 +65,14 @@ module EightyeightpagesClient
       self.url += "&limit=#{amount.to_i}"
       self
     end
+
+    def method_missing(method, *args)
+      begin
+        records.send(method, *args)
+      rescue
+        rescue super(field, *args)
+      end
+    end
   end
 
   class Query
@@ -81,11 +85,11 @@ module EightyeightpagesClient
     end
 
     def method_missing(form, *args)
-      #begin
+      begin
         Result.new(self.base_uri, "/api/forms/#{form.to_s.gsub('_', '-')}/entries.json?referer=#{referer}")
-      #rescue
-      #  rescue super(field, *args)
-      #end
+      rescue
+        rescue super(field, *args)
+      end
     end
   end
 end
