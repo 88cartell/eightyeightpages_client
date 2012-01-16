@@ -1,5 +1,6 @@
 require 'eightyeightpages_client/version'
 require 'httparty'
+require 'map'
 
 module EightyeightpagesClient
   class Result
@@ -20,7 +21,7 @@ module EightyeightpagesClient
     end
 
     def records
-      @records ||= self.class.get(self.url).parsed_response
+      @records ||= self.class.get(self.url).parsed_response.map { |record| Map.new(record).struct }
     end
 
     def where(hash)
