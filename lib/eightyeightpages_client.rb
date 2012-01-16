@@ -21,7 +21,7 @@ module EightyeightpagesClient
     end
 
     def records
-      @records ||= self.class.get(self.url).parsed_response.map { |record| Map.new(record).struct }
+      @records ||= self.class.get(self.url).parsed_response.map { |record| ReadStruct.new(record) }
     end
 
     def where(hash)
@@ -97,6 +97,72 @@ module EightyeightpagesClient
       rescue
         rescue super(field, *args)
       end
+    end
+  end
+end
+
+
+class Object
+  # The hidden singleton lurks behind everyone
+  def metaclass; class << self; self; end; end
+  alias_method :singleton_class, :metaclass
+
+  def meta_eval(&blk)
+    metaclass.instance_eval &blk
+  end
+
+  def meta_class_eval(code=nil, &blk)
+    if code.nil?
+      metaclass.class_eval &blk
+    else
+      metaclass.class_eval code, &blk
+    end
+  end
+
+  # Adds methods to a metaclass
+  def meta_def name, &blk
+    meta_eval { define_method name, &blk }
+  end
+
+  # Defines an instance method within a class
+  def class_def name, &blk
+    class_eval { define_method name, &blk }
+  end
+end
+
+class ReadStruct
+  attr_accessor :attributes
+
+  def initialize(attributes)
+    self.attributes = attributes
+  end
+
+  def [](field)
+    val = @attributes[field]
+    if field.is_a?(Symbol) and val.nil?
+      val = @attributes[field.to_s]
+    elsif field.is_a?(String) and val.nil?
+      val = @attributes[field.to_sym]
+    end
+    val
+  end
+
+  def method_missing(field, *args)
+    begin
+      if field.to_s.ends_with?('=')
+        @attributes[field] = args.first
+      elsif @attributes.key?(field) or @attributes.key?(field.to_s)
+        val = @attributes[field]
+        if val.is_a?(Hash)
+          ReadStruct.new(attributes)
+        else
+          val
+        end
+      else
+        nil # Return nil like a normal hash would.
+      end
+    rescue
+      rescue super(field, *args)
     end
   end
 end
