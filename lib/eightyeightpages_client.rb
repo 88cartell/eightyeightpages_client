@@ -1,6 +1,5 @@
 require 'eightyeightpages_client/version'
 require 'httparty'
-require 'map'
 
 module EightyeightpagesClient
   class Result
