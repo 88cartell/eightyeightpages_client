@@ -7,6 +7,28 @@ describe EightyeightpagesClient::Query do
     @query.base_uri = 'test.eightyeightpages.dev'
   end
 
+  describe "Testing readstruct" do
+    it "should support hashes" do
+      ReadStruct.new({'test' => 1}).test.should eq(1)
+    end
+
+    it "should do nesting" do
+      ReadStruct.new({'test' => {'x' => 7}}).test.x.should eq(7)
+    end
+
+    it "should do more nesting" do
+      hash = {'test' => {'x' => 7, 'yellow' => [{'b' => 'hello'}, {'c' => 'onetwo'}]}}
+      struct = ReadStruct.new(hash)
+      struct.test.yellow.first.b.should eq('hello')
+    end
+
+    xit "should do more nesting" do
+      hash = {'test' => {'x' => 7, 'y' => [{'b' => 'hello'}, {'c' => 'onetwo'}]}}
+      struct = ReadStruct.new(hash)
+      struct.test.y.first.b.should eq('hello')
+    end
+  end
+
   describe "Perform a simple list query" do
     it "should return results" do
       @query.lachlans_pages.length.should > 1
