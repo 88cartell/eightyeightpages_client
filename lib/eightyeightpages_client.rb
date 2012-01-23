@@ -1,5 +1,8 @@
 require 'eightyeightpages_client/version'
+require 'eightyeightpages_client/keyed_hash'
+require 'eightyeightpages_client/hash_with_indifferent_access'
 require 'httparty'
+require 'delegate'
 
 module EightyeightpagesClient
   class Result
@@ -98,54 +101,41 @@ module EightyeightpagesClient
       end
     end
   end
-end
 
-class ReadStruct
-  attr_accessor :attributes
+  class SuperHash < Delegator
+    attr_accessor :attributes
 
-  def initialize(attributes)
-    self.attributes = attributes
-  end
-
-  def [](field)
-    val = self.attributes[field]
-    if field.is_a?(Symbol) and val.nil?
-      val = self.attributes[field.to_s]
-    elsif field.is_a?(String) and val.nil?
-      val = self.attributes[field.to_sym]
+    def initialize(attributes)
+      self.attributes = EightyeightpagesClient::HashWithIndifferentAccess.new attributes
+      self.coerce!
+      self.define_key_methods!
     end
-    val
-  end
 
-  def key_ends_with?(key, suffix)
-    suffix = suffix.to_s
-    key[-suffix.length, suffix.length] == suffix
-  end
-
-  def method_missing(field, *args)
-    begin
-      if key_ends_with?(field.to_s, '=')
-        self.attributes[field] = args.first
-      elsif (self.attributes.key?(field) || self.attributes.key?(field.to_s))
-        val = self.attributes[field] || self.attributes[field.to_s]
-        if val.is_a?(Hash)
-          ReadStruct.new val
-        elsif val.is_a?(Array)
-          val.map do |elem|
-            if elem.is_a?(Hash)
-              ReadStruct.new elem
-            else
-              elem
-            end
+    def coerce!
+      self.attributes.each do |key, value|
+        case value
+        when Hash
+          self.attributes[key] = EightyeightpagesClient::SuperHash.new value
+        when Array
+          value.each_with_index do |array_value, index|
+            value[index] = EightyeightpagesClient::SuperHash.new(array_value) if array_value.is_a?(Hash)
           end
-        else
-          val
         end
-      else
-        nil # Return nil like a normal hash would.
       end
-    rescue => e
-      super(field, *args)
+    end
+
+    def define_key_methods!
+      self.attributes.each do |key, value|
+        self.class.send(:define_method, key.to_sym) do
+          self.attributes[key]
+        end
+      end
+    end
+
+    def __getobj__
+      @attributes
     end
   end
 end
+
+
