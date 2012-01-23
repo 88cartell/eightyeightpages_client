@@ -23,7 +23,7 @@ module EightyeightpagesClient
     end
 
     def records
-      @records ||= self.class.get(self.url).parsed_response.map { |record| ReadStruct.new(record) }
+      @records ||= self.class.get(self.url).parsed_response.map { |record| SuperHash.new(record) }
     end
 
     def where(hash)
