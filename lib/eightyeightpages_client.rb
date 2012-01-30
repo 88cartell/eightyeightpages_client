@@ -135,6 +135,10 @@ module EightyeightpagesClient
     def __getobj__
       @attributes
     end
+
+    def to_json
+      @attributes.to_json
+    end
   end
 end
 
